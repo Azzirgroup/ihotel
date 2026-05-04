@@ -11,6 +11,16 @@ frappe.ui.form.on("Group Room Assignment", {
 			frappe.model.set_value(cdt, cdn, "room", null);
 		}
 	},
+	adults(frm, cdt, cdn) {
+		const row = locals[cdt][cdn];
+		if (row.adults > 2) {
+			frappe.model.set_value(cdt, cdn, "adults", 2);
+			frappe.show_alert({
+				message: __("A room cannot have more than 2 adults."),
+				indicator: "orange",
+			});
+		}
+	},
 });
 
 frappe.ui.form.on("Group Reservation", {
