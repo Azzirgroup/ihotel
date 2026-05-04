@@ -49,6 +49,12 @@ class GroupReservation(Document):
 				"Rooming list has {0} entries but only {1} room(s) are reserved."
 			).format(len(self.rooming_list), self.no_of_rooms))
 
+		for row in (self.rooming_list or []):
+			if cint(row.adults) > 2:
+				frappe.throw(_(
+					"Rooming list row {0}: a room cannot have more than 2 adults."
+				).format(row.idx))
+
 	def on_submit(self):
 		if self.status == "Tentative":
 			self.db_set("status", "Confirmed")
@@ -260,6 +266,10 @@ def upload_rooming_list(group_reservation_name, file_url):
 		adults_val   = cint(adults) if adults not in (None, "") else 1
 		children_val = cint(children) if children not in (None, "") else 0
 		special_requests = (str(special_requests).strip() if special_requests else "")
+
+		if adults_val > 2:
+			warnings.append(_("Row {0}: skipped — a room cannot have more than 2 adults.").format(i))
+			continue
 
 		# Infer room_type from the room when missing
 		if not room_type and room:
